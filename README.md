@@ -19,6 +19,39 @@ Not included: self-update (download new releases from GitHub) and the Linux/Wine
 
 The launcher does **not** download, patch or repair game files. If files are reported missing or modified, reinstall a clean Tabula Rasa 1.16.5.0 client.
 
+## What it changes in the game client
+
+The launcher does not edit any game file to connect to Infinite Rasa. The server is passed on the command line each time it starts the game, so the install stays a stock 1.16.5.0 client and other launchers keep working with it.
+
+**Command line.** **PLAY** runs `tabula_rasa.exe` from the game folder (also used as its working directory) with:
+
+```
+tabula_rasa.exe /NoPatch /AuthServer=game.infiniterasa.org:2106 [/user=<username> [/password=<password>]]
+```
+
+| Argument | Purpose |
+| --- | --- |
+| `/NoPatch` | Skips the client's built-in patch check; the original patch servers no longer exist. |
+| `/AuthServer=<host:port>` | The selected server's address from **Settings → Servers**: `game.infiniterasa.org:2106` for Infinite Rasa, or the address you entered for your own server. |
+| `/user=<username>` | Only when a username is saved for that server. |
+| `/password=<password>` | Only when a username and password are both saved for that server. |
+
+Arguments are quoted when they contain spaces. Nothing in the registry is changed.
+
+**`client.cfg`.** The only file the launcher writes in the game folder is `client.cfg`, and only to change one line when you save **Settings**:
+
+```ini
+[Options]
+Client.UserInterface.ShowIntroMovie = False
+```
+
+- **Skip intro movie** on writes `False`; off writes `True`.
+- If the line exists, it is replaced in place. Otherwise it is added under `[Options]`, and that section is added at the end if it is missing.
+- Every other line, and the file's line endings, are kept.
+- If there is no `client.cfg`, a minimal one is created (`[ConfigInfo]` / `Version = 2` plus the `[Options]` line above); the game uses defaults for everything else.
+
+The launcher's own files (`settings.json`, and saved passwords on XP Home) live in `%APPDATA%\org.infiniterasa.launcher`, not in the game folder.
+
 ## How it works on XP
 
 - **HTTPS.** XP's own TLS stops at TLS 1.0 without modern ciphers or SNI, which the news site (behind Cloudflare) refuses. The launcher brings its own TLS 1.2 stack, [BearSSL](https://bearssl.org) (`third_party/bearssl`), and validates certificates against the Mozilla root store compiled into the exe (`third_party/cacert.pem` → `src/roots.inc`).
