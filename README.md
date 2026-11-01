@@ -52,6 +52,58 @@ Client.UserInterface.ShowIntroMovie = False
 
 The launcher's own files (`settings.json`, and saved passwords on XP Home) live in `%APPDATA%\org.infiniterasa.launcher`, not in the game folder.
 
+### Doing the same from the command line
+
+You can play without the launcher. These commands are for `cmd.exe`, which every Windows version has, XP included. Replace the folder with your own game folder.
+
+Go to the game folder (`/d` also switches drive):
+
+```bat
+cd /d "C:\Games\Tabula Rasa"
+```
+
+Start the game on Infinite Rasa:
+
+```bat
+start "" tabula_rasa.exe /NoPatch /AuthServer=game.infiniterasa.org:2106
+```
+
+With your username filled in (quote the whole argument if it contains a space):
+
+```bat
+start "" tabula_rasa.exe /NoPatch /AuthServer=game.infiniterasa.org:2106 "/user=YourName"
+```
+
+For your own server, change only the address, e.g. `/AuthServer=localhost:2106`. You can also pass `/password=…`, but avoid it: it ends up in your command history or `.bat` file, and other programs can read it while the game runs.
+
+`start ""` returns to the prompt right away; the empty `""` is the window title `start` expects first. Run `tabula_rasa.exe …` without `start` if you'd rather the prompt wait until the game closes.
+
+**A desktop shortcut instead.** Save this as `play.bat` in the game folder and double-click it. `%~dp0` is the folder the `.bat` file is in:
+
+```bat
+@echo off
+cd /d "%~dp0"
+start "" tabula_rasa.exe /NoPatch /AuthServer=game.infiniterasa.org:2106
+```
+
+**Skipping the intro movie.** See what `client.cfg` has now (no output means the line is missing and the intro plays):
+
+```bat
+findstr /i /c:"ShowIntroMovie" client.cfg
+```
+
+If there is no `client.cfg` yet, this creates the same file the launcher would:
+
+```bat
+(echo [ConfigInfo]& echo Version = 2& echo.& echo [Options]& echo Client.UserInterface.ShowIntroMovie = False)> client.cfg
+```
+
+If `client.cfg` already exists, don't run that line: it would replace the whole file. Edit it with Notepad instead and set the line under `[Options]` as shown above (add it right after `[Options]` if it is missing):
+
+```bat
+notepad client.cfg
+```
+
 ## How it works on XP
 
 - **HTTPS.** XP's own TLS stops at TLS 1.0 without modern ciphers or SNI, which the news site (behind Cloudflare) refuses. The launcher brings its own TLS 1.2 stack, [BearSSL](https://bearssl.org) (`third_party/bearssl`), and validates certificates against the Mozilla root store compiled into the exe (`third_party/cacert.pem` → `src/roots.inc`).
