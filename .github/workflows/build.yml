@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-xp:
+    # Today's Visual Studio still builds for XP; build.cmd adds the shims and
+    # fails if the exe would not load there (tools/check-xp-imports.ps1).
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The tag (v1.2.3) is the source of truth for the version.
+      - name: Set version from tag
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          $parts = ($v.Split('.') + @('0', '0', '0', '0'))[0..3] | ForEach-Object { [int]($_ -replace '\D.*$', '') }
+          $h = Get-Content src/resource.h -Raw
+          $h = $h -replace '#define APP_VERSION_STR ".*"', "#define APP_VERSION_STR `"$v`""
+          $h = $h -replace '#define APP_VERSION_NUM .*', "#define APP_VERSION_NUM $($parts -join ', ')"
+          Set-Content src/resource.h $h -NoNewline
+
+      # Offline: the live feed and badssl.com checks are left to local runs.
+      - name: Build and test
+        shell: cmd
+        run: build.cmd test --offline
+
+      - name: Collect
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory release | Out-Null
+          $name = if ("${{ github.ref_type }}" -eq 'tag') { "InfiniteRasaLauncherXP-${{ github.ref_name }}.exe" } else { 'InfiniteRasaLauncherXP.exe' }
+          Copy-Item build/InfiniteRasaLauncherXP.exe "release/$name"
+          Get-ChildItem release -File | ForEach-Object { "$((Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } |
+            Set-Content release/SHA256SUMS.txt -Encoding ascii
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: InfiniteRasaLauncherXP
+          path: release/
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" release/* --title "${{ github.ref_name }}" --generate-notes

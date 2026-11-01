@@ -1,0 +1,77 @@
+#include <windows.h>
+#include <commctrl.h>
+#include "../src/resource.h"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+IDI_APP ICON "icon.ico"
+IDR_MANIFEST RCDATA "manifest.json"
+IDR_LOGO RCDATA "logo.png"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "app.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION APP_VERSION_NUM
+PRODUCTVERSION APP_VERSION_NUM
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Infinite Rasa"
+            VALUE "FileDescription", "Infinite Rasa Launcher (Windows XP)"
+            VALUE "FileVersion", APP_VERSION_STR
+            VALUE "LegalCopyright", "Infinite Rasa project"
+            VALUE "OriginalFilename", "InfiniteRasaLauncherXP.exe"
+            VALUE "ProductName", "Infinite Rasa Launcher"
+            VALUE "ProductVersion", APP_VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+IDD_SETTINGS DIALOGEX 0, 0, 300, 230
+STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    GROUPBOX        "Game", IDC_STATIC, 7, 7, 286, 62
+    EDITTEXT        IDC_GAMEDIR, 14, 20, 170, 14, ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "&Browse...", IDC_BROWSE, 188, 20, 48, 14
+    PUSHBUTTON      "Full &verify", IDC_VERIFY, 239, 20, 48, 14
+    AUTOCHECKBOX    "Skip &intro movie", IDC_SKIPINTRO, 14, 39, 260, 10
+    AUTOCHECKBOX    "&Close launcher when the game starts", IDC_CLOSEONLAUNCH, 14, 52, 260, 10
+
+    GROUPBOX        "Servers", IDC_STATIC, 7, 74, 286, 128
+    CONTROL         "", IDC_SERVERS, "SysListView32", LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP, 14, 87, 218, 90
+    PUSHBUTTON      "&Add...", IDC_ADD, 238, 87, 48, 14
+    PUSHBUTTON      "&Edit...", IDC_EDIT, 238, 105, 48, 14
+    PUSHBUTTON      "&Remove", IDC_REMOVE, 238, 123, 48, 14
+    LTEXT           "Saved passwords are stored in Windows Credential Manager.", IDC_PWHINT, 14, 182, 272, 16
+
+    DEFPUSHBUTTON   "Save", IDOK, 189, 209, 50, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 243, 209, 50, 14
+END
+
+IDD_SERVER DIALOGEX 0, 0, 230, 132
+STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Server"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "&Name:", IDC_STATIC, 7, 9, 85, 8
+    EDITTEXT        IDC_NAME, 95, 7, 128, 14, ES_AUTOHSCROLL
+    LTEXT           "&Auth server (host:port):", IDC_STATIC, 7, 27, 85, 8
+    EDITTEXT        IDC_HOST, 95, 25, 128, 14, ES_AUTOHSCROLL
+    LTEXT           "&Username (optional):", IDC_STATIC, 7, 45, 85, 8
+    EDITTEXT        IDC_USER, 95, 43, 128, 14, ES_AUTOHSCROLL
+    LTEXT           "&Password:", IDC_STATIC, 7, 63, 85, 8
+    EDITTEXT        IDC_PASSWORD, 95, 61, 128, 14, ES_AUTOHSCROLL | ES_PASSWORD
+    AUTOCHECKBOX    "&Forget the saved password", IDC_FORGET, 95, 79, 128, 10
+    LTEXT           "", IDC_PWNOTE, 7, 93, 216, 16
+    DEFPUSHBUTTON   "OK", IDOK, 119, 111, 50, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 173, 111, 50, 14
+END
